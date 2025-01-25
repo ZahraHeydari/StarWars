@@ -3,8 +3,8 @@ package com.android.data
 import com.android.data.entity.CharacterDetail
 import com.android.data.entity.CharacterResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.http.Url
 
 interface SwapiDataService {
 
@@ -13,8 +13,8 @@ interface SwapiDataService {
         @Query("search") query: String
     ): CharacterResponse
 
-    @GET
+    @GET("/api/people/{id}/")
     suspend fun getCharacterDetail(
-        @Url url: String
+        @Path("id") id : String
     ): CharacterDetail
 }

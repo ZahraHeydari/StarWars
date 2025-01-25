@@ -1,5 +1,6 @@
-package com.android.presentation.screen
+package com.android.presentation.search
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -29,12 +30,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.android.domain.entity.CharacterResponseObject
 import com.android.domain.util.ResultOf
-import com.android.presentation.viewmodel.CharactersViewModel
 
 @Composable
-fun CharacterSearchScreen(navController: NavHostController, viewModel: CharactersViewModel) {
+fun CharacterSearchScreen(
+    navController: NavHostController,
+    viewModel: CharacterSearchViewModel
+) {
     var query by remember { mutableStateOf(TextFieldValue("")) }
-    val charactersState by viewModel.characterResponseObject.collectAsState()
+
     Column(modifier = Modifier.padding(16.dp)) {
         Spacer(modifier = Modifier.height(48.dp))
         Text(
@@ -60,8 +63,7 @@ fun CharacterSearchScreen(navController: NavHostController, viewModel: Character
                         .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
                 ) {
                     if (query.text.isEmpty()) Text(
-                        "Enter character name",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        "Enter character name"
                     )
                     innerTextField()
                 }
@@ -72,10 +74,10 @@ fun CharacterSearchScreen(navController: NavHostController, viewModel: Character
         Text(text = "Results:", style = MaterialTheme.typography.titleSmall)
         Spacer(modifier = Modifier.height(8.dp))
 
-        when (charactersState) {
+        when (viewModel.characterResponseObject) {
             is ResultOf.Success -> {
                 val characters =
-                    (charactersState as ResultOf.Success<CharacterResponseObject>).value.results
+                    (viewModel.characterResponseObject as ResultOf.Success<CharacterResponseObject>).value.results
                 if (characters.isEmpty()) {
                     Text(text = "No results found", modifier = Modifier.padding(8.dp))
                 } else {
@@ -86,10 +88,8 @@ fun CharacterSearchScreen(navController: NavHostController, viewModel: Character
                                 modifier = Modifier
                                     .padding(8.dp)
                                     .clickable {
-                                        character.url?.let {
-                                            viewModel.getCharacterDetail(it)
-                                            navController.navigate(route = "details/character")
-                                        }
+                                        val characterId = Uri.parse(character.url).lastPathSegment
+                                        navController.navigate(route = "details/$characterId")
                                     }
                             )
                             Divider()
@@ -108,7 +108,8 @@ fun CharacterSearchScreen(navController: NavHostController, viewModel: Character
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         text = "Failed to load data:" +
-                                " ${(charactersState as ResultOf.Failure<CharacterResponseObject>).throwable.message}"
+                                " ${(viewModel.characterResponseObject 
+                                        as ResultOf.Failure<CharacterResponseObject>).throwable.message}"
                     )
                 }
             }

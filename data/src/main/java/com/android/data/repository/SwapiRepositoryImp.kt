@@ -12,27 +12,21 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 class SwapiRepositoryImp(private val dataService: SwapiDataService) : SwapiRepository {
-    override suspend fun fetchItems(query: String): Flow<ResultOf<CharacterResponseObject>> {
-        return flow {
-            emit(ResultOf.Loading())
-            try {
-                val response = dataService.searchCharacters(query).mapTo()
-                emit(ResultOf.Success(response))
-            } catch (e: Exception) {
-                emit(ResultOf.Failure(e))
-            }
-        }.flowOn(Dispatchers.IO)
+    override suspend fun fetchItems(query: String): ResultOf<CharacterResponseObject> {
+        return try {
+            val response = dataService.searchCharacters(query).mapTo()
+            ResultOf.Success(response)
+        } catch (e: Exception) {
+            ResultOf.Failure(e)
+        }
     }
 
-    override suspend fun getCharacterDetail(url: String): Flow<ResultOf<CharacterDetailObject>> {
-        return flow {
-            emit(ResultOf.Loading())
-            try {
-                val response = dataService.getCharacterDetail(url).mapTo()
-                emit(ResultOf.Success(response))
-            } catch (e: Exception) {
-                emit(ResultOf.Failure(e))
-            }
-        }.flowOn(Dispatchers.IO)
+    override suspend fun getCharacterDetail(id: String): ResultOf<CharacterDetailObject> {
+        return try {
+            val response = dataService.getCharacterDetail(id).mapTo()
+            ResultOf.Success(response)
+        } catch (e: Exception) {
+            ResultOf.Failure(e)
+        }
     }
 }

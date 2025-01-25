@@ -1,4 +1,4 @@
-package com.android.presentation.screen
+package com.android.presentation.detail
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,22 +10,23 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.android.domain.entity.CharacterDetailObject
 import com.android.domain.util.ResultOf
-import com.android.presentation.viewmodel.CharactersViewModel
 
 @Composable
-fun CharacterDetailScreen(viewModel: CharactersViewModel) {
-    val characterDetailState by viewModel.characterDetailObject.collectAsState()
-    when (characterDetailState) {
+fun CharacterDetailScreen(viewModel: CharacterDetailViewModel,
+                          characterId : String
+) {
+    LaunchedEffect(characterId) {
+        viewModel.getCharacterDetail(characterId)
+    }
+
+    when (val characterDetailState = viewModel.characterDetailObject.value) {
         is ResultOf.Success -> {
-            val characterDetailObject =
-                (characterDetailState as ResultOf.Success<CharacterDetailObject>).value
+            val characterDetailObject = characterDetailState.value
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -85,8 +86,7 @@ fun CharacterDetailScreen(viewModel: CharactersViewModel) {
         is ResultOf.Failure -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Failed to load data:" +
-                            " ${(characterDetailState as ResultOf.Failure<CharacterDetailObject>).throwable.message}"
+                    text = "Failed to load data:" + " ${characterDetailState.throwable.message}"
                 )
             }
         }

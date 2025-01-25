@@ -3,14 +3,16 @@ package com.android.starwarsapp.di
 import com.android.domain.repository.SwapiRepository
 import com.android.domain.usecase.FetchCharactersUseCase
 import com.android.domain.usecase.GetCharacterDetailUseCase
-import com.android.presentation.viewmodel.CharactersViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import com.android.presentation.detail.CharacterDetailViewModel
+import com.android.presentation.search.CharacterSearchViewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val appModule = module {
     single { createFetchCharactersUseCase(get()) }
     single { createGetCharacterDetailUseCase(get()) }
-    viewModel { CharactersViewModel(get(), get()) }
+    viewModelOf(::CharacterSearchViewModel)
+    viewModelOf(::CharacterDetailViewModel)
 }
 
 private fun createFetchCharactersUseCase(repository: SwapiRepository)
