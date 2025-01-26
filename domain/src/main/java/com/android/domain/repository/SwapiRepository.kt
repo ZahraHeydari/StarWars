@@ -6,5 +6,5 @@ import com.android.domain.util.ResultOf
 
 interface SwapiRepository {
     suspend fun fetchItems(query: String): ResultOf<CharacterResponseObject>
-    suspend fun getCharacterDetail(url: String): ResultOf<CharacterDetailObject>
+    suspend fun getCharacterDetail(id: String): ResultOf<CharacterDetailObject>
 }

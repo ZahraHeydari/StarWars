@@ -1,7 +1,6 @@
 package com.android.presentation.search
 
 import android.net.Uri
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,17 +17,17 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.android.domain.entity.CharacterResponseObject
 import com.android.domain.util.ResultOf
 
 @Composable
@@ -52,6 +51,10 @@ fun CharacterSearchScreen(
                 query = it
                 viewModel.searchCharacters(it.text) // Trigger search
             },
+            textStyle = TextStyle(
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 14.sp
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
@@ -60,11 +63,8 @@ fun CharacterSearchScreen(
                     Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
-                        .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
                 ) {
-                    if (query.text.isEmpty()) Text(
-                        "Enter character name"
-                    )
+                    if (query.text.isEmpty()) Text("Enter character name")
                     innerTextField()
                 }
             }
@@ -74,10 +74,9 @@ fun CharacterSearchScreen(
         Text(text = "Results:", style = MaterialTheme.typography.titleSmall)
         Spacer(modifier = Modifier.height(8.dp))
 
-        when (viewModel.characterResponseObject) {
+        when (val characterResponseObject = viewModel.characterResponseObject.value) {
             is ResultOf.Success -> {
-                val characters =
-                    (viewModel.characterResponseObject as ResultOf.Success<CharacterResponseObject>).value.results
+                val characters = characterResponseObject.value.results
                 if (characters.isEmpty()) {
                     Text(text = "No results found", modifier = Modifier.padding(8.dp))
                 } else {
@@ -106,11 +105,7 @@ fun CharacterSearchScreen(
 
             is ResultOf.Failure -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "Failed to load data:" +
-                                " ${(viewModel.characterResponseObject 
-                                        as ResultOf.Failure<CharacterResponseObject>).throwable.message}"
-                    )
+                    Text(text = "Failed to load data: ${characterResponseObject.throwable.message}")
                 }
             }
         }

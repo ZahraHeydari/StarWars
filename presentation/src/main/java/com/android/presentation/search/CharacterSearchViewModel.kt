@@ -1,5 +1,6 @@
 package com.android.presentation.search
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.domain.entity.CharacterResponseObject
@@ -11,8 +12,8 @@ class CharacterSearchViewModel(
     private val fetchCharactersUseCase: FetchCharactersUseCase
 ) : ViewModel() {
 
-    var characterResponseObject:
-            ResultOf<CharacterResponseObject> = ResultOf.Success(CharacterResponseObject())
+    var characterResponseObject =
+        mutableStateOf<ResultOf<CharacterResponseObject>>(ResultOf.Loading())
         private set
 
     fun searchCharacters(query: String?) {
@@ -21,9 +22,9 @@ class CharacterSearchViewModel(
             kotlin.runCatching {
                 fetchCharactersUseCase.invoke(query)
             }.onSuccess {
-                characterResponseObject = it
+                characterResponseObject.value = it
             }.onFailure {
-                characterResponseObject = ResultOf.Failure(it)
+                characterResponseObject.value = ResultOf.Failure(it)
                 it.printStackTrace()
             }
         }
