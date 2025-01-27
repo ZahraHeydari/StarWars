@@ -17,6 +17,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ fun CharacterSearchScreen(
     viewModel: CharacterSearchViewModel
 ) {
     var query by remember { mutableStateOf(TextFieldValue("")) }
+    val characterResponseState = viewModel.characterResponseObject.collectAsState()
 
     Column(modifier = Modifier.padding(16.dp)) {
         Spacer(modifier = Modifier.height(48.dp))
@@ -74,9 +76,9 @@ fun CharacterSearchScreen(
         Text(text = "Results:", style = MaterialTheme.typography.titleSmall)
         Spacer(modifier = Modifier.height(8.dp))
 
-        when (val characterResponseObject = viewModel.characterResponseObject.value) {
+        when (val result = characterResponseState.value) {
             is ResultOf.Success -> {
-                val characters = characterResponseObject.value.results
+                val characters = result.value.results
                 if (characters.isEmpty()) {
                     Text(text = "No results found", modifier = Modifier.padding(8.dp))
                 } else {
@@ -105,7 +107,20 @@ fun CharacterSearchScreen(
 
             is ResultOf.Failure -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Failed to load data: ${characterResponseObject.throwable.message}")
+                    Text(
+                        text = "Failed to load data: ${result.throwable.message}"
+                    )
+                }
+            }
+
+            is ResultOf.Nothing -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = """
+                        You have not searched
+                         any characters yet!
+                    """.trimIndent()
+                    )
                 }
             }
         }

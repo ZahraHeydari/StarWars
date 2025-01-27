@@ -11,22 +11,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.domain.util.ResultOf
 
 @Composable
-fun CharacterDetailScreen(viewModel: CharacterDetailViewModel,
-                          characterId : String
+fun CharacterDetailScreen(
+    viewModel: CharacterDetailViewModel,
+    characterId: String
 ) {
+    val characterDetailState = viewModel.characterDetailObject.collectAsState()
+
     LaunchedEffect(characterId) {
         viewModel.getCharacterDetail(characterId)
     }
 
-    when (val characterDetailState = viewModel.characterDetailObject.value) {
+    when (val result = characterDetailState.value) {
         is ResultOf.Success -> {
-            val characterDetailObject = characterDetailState.value
+            val characterDetailObject = result.value
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -86,7 +90,18 @@ fun CharacterDetailScreen(viewModel: CharacterDetailViewModel,
         is ResultOf.Failure -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Failed to load data:" + " ${characterDetailState.throwable.message}"
+                    text = "Failed to load data: ${result.throwable.message}"
+                )
+            }
+        }
+
+        is ResultOf.Nothing -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = """
+                        You have not searched
+                         any characters yet!
+                    """.trimIndent()
                 )
             }
         }
